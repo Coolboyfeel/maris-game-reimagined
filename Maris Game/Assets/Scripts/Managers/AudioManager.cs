@@ -20,9 +20,7 @@ public class AudioManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void Update() {
-    }
-
+    //Plays a sound with given name on the standard source
     public void PlaySound(string name) {
         Sound s = Array.Find(sounds, sound => sound.name == name);
         if(s != null) {
@@ -30,13 +28,43 @@ public class AudioManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    public AudioClip FindClip(string name) {
-        Sound s = Array.Find(sounds, sound => sound.name == name);
-        if(s != null) {
-            return s.source.clip;
+    //Plays a sound with given name on given source 
+    public void Play(string name, AudioSource source) {
+        AudioClip s = FindClip(name);
+        source.clip = s;
+        source.Play();
+    } 
+
+
+    //Stops a source playing a sound with a check if it's playing given sound
+    public void Stop(string name, AudioSource source) {
+        if(source.isPlaying && source.clip.name == name) {
+            source.Stop();
+        } 
+    }
+
+    //Stops a source without any checks.
+    public void Stop(AudioSource source) {
+        if(source.isPlaying) {
+            source.Stop();
         }
-        Debug.LogError("Audio Clip: " + name + " not found");
-        return null;
+        
+    }
+
+     
+    /*
+    * Finds a clip in the array with given name
+    * Throws exception if clip not found
+    */
+    public AudioClip FindClip(string name)  {
+        Sound s = Array.Find(sounds, sound => sound.name == name);
+        
+        if(s == null) {
+            throw new Exception("Audio clip: " + name + " not found");
+        }
+        
+
+        return s.source.clip;
     }
 
     public SubtitleObject FindSubtitle(string name) {

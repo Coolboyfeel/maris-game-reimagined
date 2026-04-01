@@ -8,10 +8,12 @@ public class Interactable : MonoBehaviour, IDataPersistence
     public Transform[] spawnPoints;
     public int arrayIndex = 0;
     public string collectibleName;
+
+    [Header("Debug")]
     public bool collected = false;
     public bool canOpen = false;
     
-    public string collectibleID;
+    protected  string collectibleID {get; private set; }
 
     [ContextMenu("Generate ID for collectible")]
     private void GenerateGuid() {
@@ -27,15 +29,15 @@ public class Interactable : MonoBehaviour, IDataPersistence
     }
 
     public void Update() {
-        if(collected) {
-            this.gameObject.SetActive(false);
-        }
     }
 
 
     public void LoadData(GameData data) {
         Debug.Log("Interactable Data Loaded)");
         data.collectiblesCollected.TryGetValue(this.collectibleID, out collected);
+        if(collected) {
+            this.gameObject.SetActive(false);
+        }
     }
 
 

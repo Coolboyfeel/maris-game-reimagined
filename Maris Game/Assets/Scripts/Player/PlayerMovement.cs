@@ -6,15 +6,17 @@ using UnityEngine.Audio;
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController controller;
-    public AudioSource audioSource;
+    
 
+    [Header("Movement variables")]
     public float speed = 12f;
     public float sprintMultiplier;
 
     public float gravity = -9.81f;
+    public float groundDistance = 0.4f;
 
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
+    
     public LayerMask groundMask;
     
 
@@ -24,8 +26,13 @@ public class PlayerMovement : MonoBehaviour
     public bool sprinting = false;
     public bool canMove = true;
     
-    private InputManager inputManager;
-    private GameManager gameManager;
+    private InputManager inputM;
+    private GameManager gameM;
+
+    [Header("Audio")]
+    public AudioSource audioSource;
+    private AudioManager audioM;
+
     private CapsuleCollider cc;
     public Kleding kledingScript;
     public Camera mainCam;
@@ -44,86 +51,85 @@ public class PlayerMovement : MonoBehaviour
     private void Start() {
         cc = GetComponent<CapsuleCollider>();
         audioSource = GetComponent<AudioSource>();
-        gameManager = GameManager.instance;
-        inputManager = GameManager.instance.inputManager;
+
+        //Managers
+        gameM = GameManager.instance;
+        inputM = GameManager.instance.inputManager;
+        audioM = GameManager.instance.audioManager;
     }
 
     private void Update() {
-
-        if(canMove) {
-            float x = 0f;
-            float z = 0f;
-            //Vertical Inputs
-            if(Input.GetKey(inputManager.forwardKey)) {
-                z = 1f;
-                walking = true;
-            } else if(Input.GetKey(inputManager.backwardKey)) {
-                z = -1f;
-                walking = true;
-            } else {
-                walking = false;
-            }
-            //Horizontal Inputs
-            if(Input.GetKey(inputManager.rightKey)) {
-                x = 1f;
-                walking = true;
-            }
-            else if(Input.GetKey(inputManager.leftKey)) {
-                x = -1f;
-                walking = true;
-            } else {
-                walking = false;
-            }
-            Vector3 move = transform.right * x + transform.forward * z;
-
-            if(Input.GetKey(inputManager.sprintKey)) {
-                if(!kledingScript.mondkapjeOp) {
-                    sprinting = true;
-                    move *= sprintMultiplier;
-                } else{
-                    sprinting = false;
-                }  
-            } else{
-                sprinting = false;
-            }
-            controller.Move(move * speed * Time.deltaTime);
-        }
-
-
-        if(walking && !sprinting) {
-            if(this.audioSource.clip.name == "Walking fast ") {
-                this.audioSource.Stop();
-            }
-
-            if(!this.audioSource.isPlaying) {
-                AudioClip clip = GameManager.instance.audioManager.FindClip("Walking");
-                this.audioSource.clip = clip;
-                this.audioSource.Play();
-                Debug.Log("Play Walking Sound");
-            }
-            
-        } else if(!walking) {
-            this.audioSource.Stop();
-        }
-
-        if(walking && sprinting) {
-            if(audioSource.clip.name == "Walking slow ") {
-                this.audioSource.Stop();
-            }
-            if(!this.audioSource.isPlaying) {
-                AudioClip clip = GameManager.instance.audioManager.FindClip("Sprinting");
-                this.audioSource.clip = clip;
-                this.audioSource.Play();
-            }
-        }
-
         if(won) {
-            if(transform.position == winPosition && transform.rotation == winRotation && sceneCam.fieldOfView == 39.6f) {
+            if(transform.position == winPosition 
+                && transform.rotation == winRotation 
+                && sceneCam.fieldOfView == 39.6f) {
                 GameManager.instance.Win();
             }
         }
+        
+        if(!canMove) {
+            return;
+        }
 
         
+        float x = 0f;
+        float z = 0f;
+        //Vertical Inputs
+        if(Input.GetKey(inputM.forwardKey)) {
+            z = 1f;
+            
+        } else if(Input.GetKey(inputM.backwardKey)) {
+            z = -1f;
+
+        }
+        //Horizontal Inputs
+        if(Input.GetKey(inputM.rightKey)) {
+            x = 1f;
+        }
+        else if(Input.GetKey(inputM.leftKey)) {
+            x = -1f;
+            
+        } 
+
+        Vector3 move = transform.right * x + transform.forward * z;
+
+        if(Input.GetKey(inputM.sprintKey)) {
+            if(kledingScript.mondkapjeOp) {
+                return;
+            }
+
+            sprinting = true;
+            move *= sprintMultiplier;
+        } else {
+            sprinting = false;
+        }
+        controller.Move(move * speed * Time.deltaTime);
+
+
+        if((x != 0 || z != 0) && !sprinting) {
+            audioM.Stop("Sprinting", audioSource);
+
+            if(!audioSource.isPlaying) {
+               audioM.Play("Walking", audioSource);
+            }
+            
+        } else if((x != 0 || z != 0) && sprinting) {
+            audioM.Stop("Walking", audioSource);
+
+            if(!audioSource.isPlaying) {
+               audioM.Play("Sprinting", audioSource);
+            }  
+        } else {
+            audioM.Stop(audioSource);
+        }
+
+        if(walking && sprinting) {
+            audioM.Stop("Sprinting", audioSource);
+
+            if(!audioSource.isPlaying) {
+               audioM.Play("Walking", audioSource);
+            }
+        }        
     }
 
     IEnumerator Win() {
