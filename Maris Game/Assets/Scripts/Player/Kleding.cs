@@ -42,7 +42,7 @@ public class Kleding : MonoBehaviour
         }
 
         if(Input.GetKeyDown(inputManager.clothesOnKey)) {
-            GameManager.instance.audioManager.PlaySound("ClothesOn");
+            GameManager.instance.audioManager.Play("ClothesOn");
             
             if(!mondkapjeOp) {
                 mondkapjeOp = true;
@@ -65,7 +65,7 @@ public class Kleding : MonoBehaviour
         }
 
         if(Input.GetKeyDown(inputManager.clothesOnKey)) {
-            GameManager.instance.audioManager.PlaySound("ClothesOn");
+            GameManager.instance.audioManager.Play("ClothesOn");
             if(!jasAan) {
                 jasAan = true;
                 anim.Play("JasAan", 2);

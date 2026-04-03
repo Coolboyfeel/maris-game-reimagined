@@ -15,7 +15,7 @@ public class AIController : MonoBehaviour
     private NavMeshAgent agent;
     private SphereCollider sc;
     private Patrol patrol;
-    public Subtitles subtitles;
+    
 
     [Header("AI settings")]
     public bool chase;
@@ -34,21 +34,30 @@ public class AIController : MonoBehaviour
     public string[] kapjeSounds;
     public string[] jasSounds;
     public string[] angrySounds;
+    public Subtitles subtitles;
+
+    public Sound[] normalSoundss;
+    public Sound[] kapjeSoundss;
+    public Sound[] jasSoundss;
+    public Sound[] angrySoundss;
 
     //patrol
     [Header("Patrol")]
     public float walkRange;
 
-    [Header("Smooth Turning")]
+    [Header("Turning variables")]
     public float turnSpeed = 1f;
     private Coroutine lookCoroutine;
     private float curTurnTime = 0;
 
 
-    [Header("Hearing")]
+    [Header("Hearing debug")]
     public bool hearingPlayer = false;
 
     public bool canMove = true;
+    
+    private GameManager gameM;
+    private AudioManager audioM;
 
 
     private void Start() {
@@ -58,18 +67,21 @@ public class AIController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.Find("Player");
         kledingScript = GameObject.Find("Camera Holder").transform.GetChild(0).GetComponent<Kleding>();
+
+        gameM = GameManager.instance;
+        audioM = gameM.audioManager;
     }
 
     private void Update() {
         if(walking) {
 
             if(!this.walkingAudio.isPlaying) {
-                AudioClip clip = GameManager.instance.audioManager.FindClip("Walking");
+                AudioClip clip = audioM.FindClip("Walking");
                 this.walkingAudio.clip = clip;
                 this.walkingAudio.Play();
             }
             
-        } else if (GameManager.instance.paused) {
+        } else if (gameM.paused) {
             this.walkingAudio.Stop(); 
         } else {
             this.walkingAudio.Stop();
@@ -90,23 +102,23 @@ public class AIController : MonoBehaviour
         if(Vector3.Angle(rayDirection, transform.forward) < fov / 2) {
             if(Physics.Raycast (transform.position, rayDirection, out hitInfo, visionDistance)) {
                 if(hitInfo.transform.tag == "Player") {
-                    if(GameManager.instance.collectiblesCollected == 0) {
+                    if(gameM.collectiblesCollected == 0) {
                         chasing = false;
                         inSight = true;
-                    } else if(GameManager.instance.collectiblesCollected == 1) {
+                    } else if(gameM.collectiblesCollected == 1) {
                         if(!kledingScript.mondkapjeOp && chase) {
                             chasing = true;
                             seen = true;
                             inSight = true;
                         } 
-                    } else if(GameManager.instance.collectiblesCollected == 2) {
+                    } else if(gameM.collectiblesCollected == 2) {
                         //if the player doesnt have their face mask on or have their jacket on, chase the player 
                         if(!kledingScript.mondkapjeOp && chase || kledingScript.jasAan && chase) {
                             chasing = true;
                             seen = true;
                             inSight = true;
                         } 
-                    } else if(GameManager.instance.collectiblesCollected >= 3) {
+                    } else if(gameM.collectiblesCollected >= 3) {
                         patrol.enabled = false;
                         chasing = true;
                         inSight = true;
@@ -146,7 +158,7 @@ public class AIController : MonoBehaviour
         }
         
 
-        if(GameManager.instance.collectiblesCollected == 3) {
+        if(gameM.collectiblesCollected == 3) {
             agent.speed = 8f;
         }
     }
@@ -202,8 +214,7 @@ public class AIController : MonoBehaviour
         string curName = "";
         Debug.Log("PLay Random Sound");
         int randomNum = Mathf.RoundToInt(Random.Range(0f, 1f));
-        int collected = GameManager.instance.collectiblesCollected;
-        AudioManager audioManager = GameManager.instance.audioManager;
+        int collected = gameM.collectiblesCollected;
 
         if(collected == 0) {
             int index = Mathf.RoundToInt(Random.Range(0f, 1f));
@@ -235,8 +246,8 @@ public class AIController : MonoBehaviour
             curName = angrySounds[index];
         }
 
-        AudioClip clip = audioManager.FindClip(curName);
-        SubtitleObject subtitle = audioManager.FindSubtitle(curName);
+        AudioClip clip = audioM.FindClip(curName);
+        SubtitleObject subtitle = audioM.FindSubtitle(curName);
         this.audioSource.clip = clip;
         this.audioSource.Play();
         if(subtitle != null) {

@@ -9,6 +9,8 @@ public class AudioManager : MonoBehaviour, IDataPersistence
     public bool subtitles = false;
     public Sound[] sounds;
 
+    private GameManager gameM;
+
     private void Awake() {
         foreach (Sound s in sounds) {
             s.source = gameObject.AddComponent<AudioSource>();
@@ -20,8 +22,13 @@ public class AudioManager : MonoBehaviour, IDataPersistence
         }
     }
 
+    private void Start()
+    {
+        gameM = GameManager.instance;
+    }
+
     //Plays a sound with given name on the standard source
-    public void PlaySound(string name) {
+    public void Play(string name) {
         Sound s = Array.Find(sounds, sound => sound.name == name);
         if(s != null) {
             s.source.Play();
@@ -33,7 +40,14 @@ public class AudioManager : MonoBehaviour, IDataPersistence
         AudioClip s = FindClip(name);
         source.clip = s;
         source.Play();
-    } 
+    }
+    
+    //Plays a given sound on given source
+    public void Play(Sound sound, AudioSource source)
+    {
+        source.clip = sound.clip;
+        source.Play();
+    }
 
 
     //Stops a source playing a sound with a check if it's playing given sound
@@ -100,8 +114,13 @@ public class AudioManager : MonoBehaviour, IDataPersistence
 
     }
 
-    public void OnSceneLoaded() {
-
+    public void OnSceneLoaded()
+    {
+        string curScene = SceneManager.GetActiveScene().name;
+        if (curScene == "Maris" || curScene == "Game Over")
+        {
+            Play("Ambience");
+        }
     }
 
 }

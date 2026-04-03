@@ -130,16 +130,18 @@ public class GameManager : MonoBehaviour, IDataPersistence
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
         audioManager.OnSceneLoaded();
+
+        string curScene = SceneManager.GetActiveScene().name;
         vp = FindObjectOfType<VideoPlayer>();
         if(vp != null) {
             vp.loopPointReached += VideoFinished;
         }
 
-        if(SceneManager.GetActiveScene().name == "Loading Screen") {
+        if(curScene == "Loading Screen") {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
 
-        if(SceneManager.GetActiveScene().name == "Intro") {
+        if(curScene == "Intro") {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
@@ -161,17 +163,14 @@ public class GameManager : MonoBehaviour, IDataPersistence
             }
         }
 
-        if(SceneManager.GetActiveScene().name == "Maris") {
-            audioManager.PlaySound("Ambience");
-        }
+        
 
-        if(SceneManager.GetActiveScene().name == "Game Over") {
+        if(curScene == "Game Over") {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            audioManager.PlaySound("Ambience");
         }
 
-        if(SceneManager.GetActiveScene().name == "Outro") {
+        if(curScene == "Outro") {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 

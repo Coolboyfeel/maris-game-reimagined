@@ -13,7 +13,9 @@ public class Interactable : MonoBehaviour, IDataPersistence
     public bool collected = false;
     public bool canOpen = false;
     
-    protected  string collectibleID {get; private set; }
+    protected string collectibleID {get; private set; }
+    private GameManager gameM;
+    private AudioManager audioM;
 
     [ContextMenu("Generate ID for collectible")]
     private void GenerateGuid() {
@@ -28,7 +30,10 @@ public class Interactable : MonoBehaviour, IDataPersistence
         }
     }
 
-    public void Update() {
+    private void Start()
+    {
+        gameM = GameManager.instance;
+        audioM = gameM.audioManager;
     }
 
 
@@ -54,13 +59,13 @@ public class Interactable : MonoBehaviour, IDataPersistence
 
     public void Interacted() {
         if(this.interactSort[arrayIndex] == "Collectible") {
-            GameManager.instance.audioManager.PlaySound("Item Collected");
+            audioM.Play("Item Collected");
             this.collected = true;
             this.gameObject.SetActive(false);
             if(this.collectibleName != "secret") {
-                GameManager.instance.collectiblesCollected++;
-                if(GameManager.instance.collectiblesCollected == 3) {
-                    GameManager.instance.audioManager.PlaySound("Laugh");
+                gameM.collectiblesCollected++;
+                if(gameM.collectiblesCollected == 3) {
+                    audioM.Play("Laugh");
                 }
             }
             
