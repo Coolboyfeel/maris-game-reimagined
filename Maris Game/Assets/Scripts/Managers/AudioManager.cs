@@ -10,6 +10,9 @@ public class AudioManager : MonoBehaviour, IDataPersistence
     public Sound[] sounds;
 
     private GameManager gameM;
+    public AudioSource defaultSource;
+
+    public float volume = 1f;
 
     private void Awake() {
         foreach (Sound s in sounds) {
@@ -19,7 +22,7 @@ public class AudioManager : MonoBehaviour, IDataPersistence
             s.source.pitch = s.pitch;
             s.source.loop = s.loop;
             s.source.spatialBlend = s.spatialBlend;
-        }
+        } 
     }
 
     private void Start()
@@ -29,24 +32,41 @@ public class AudioManager : MonoBehaviour, IDataPersistence
 
     //Plays a sound with given name on the standard source
     public void Play(string name) {
-        Sound s = Array.Find(sounds, sound => sound.name == name);
-        if(s != null) {
-            s.source.Play();
-        }
+        Sound s = FindSound(name);
+        Play(s, defaultSource);
     }
 
     //Plays a sound with given name on given source 
     public void Play(string name, AudioSource source) {
-        AudioClip s = FindClip(name);
-        source.clip = s;
-        source.Play();
+        Sound s = FindSound(name);
+        Play(s, source);
     }
     
     //Plays a given sound on given source
     public void Play(Sound sound, AudioSource source)
     {
-        source.clip = sound.clip;
+        //Check if the source is not already playing the given sound.
+        if (source.isPlaying) {
+            if (source.clip == sound.clip) {
+                return;
+            }
+            else {
+                Stop(source);    
+            }
+            
+        } 
+        if (source.isPlaying) Stop(source);
+        InitializeSource(sound, source);
         source.Play();
+    }
+
+    private void InitializeSource(Sound sound, AudioSource source)
+    {
+        source.clip = sound.clip;
+        source.volume = sound.volume * this.volume;
+        source.pitch = sound.pitch;
+        source.loop = sound.loop;
+        source.spatialBlend = sound.spatialBlend;
     }
 
 
@@ -62,7 +82,6 @@ public class AudioManager : MonoBehaviour, IDataPersistence
         if(source.isPlaying) {
             source.Stop();
         }
-        
     }
 
      
@@ -70,15 +89,14 @@ public class AudioManager : MonoBehaviour, IDataPersistence
     * Finds a clip in the array with given name
     * Throws exception if clip not found
     */
-    public AudioClip FindClip(string name)  {
+    public Sound FindSound(string name)  {
         Sound s = Array.Find(sounds, sound => sound.name == name);
         
         if(s == null) {
-            throw new Exception("Audio clip: " + name + " not found");
+            throw new Exception("Sound object: " + name + " not found");
         }
         
-
-        return s.source.clip;
+        return s;
     }
 
     public SubtitleObject FindSubtitle(string name) {

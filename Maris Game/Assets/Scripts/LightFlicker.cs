@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using Random = UnityEngine.Random;
 
 public class LightFlicker : MonoBehaviour
 {
@@ -18,16 +20,25 @@ public class LightFlicker : MonoBehaviour
 	public Material lightOfMat;
 	public Renderer renderer;
 	private int collected;
+
+	private GameManager gameM;
+	private AudioManager audioM;
+	
 	
 	void Start () {
 		renderer = GetComponentInParent<Renderer>();
 		audioSource = GetComponent<AudioSource>();
 		curLight = GetComponent<Light>();
 		StartCoroutine(Flashing());
+		
+		gameM = GameManager.instance;
+		audioM = gameM.audioManager;
 	}
 	
 	void Update() {
-		if(GameManager.instance.collectiblesCollected <= 3) {
+		int collected = gameM.collectiblesCollected;
+		
+		if(collected <= 3) {
 			minWaitTime = minWaitTimes[GameManager.instance.collectiblesCollected];
 			maxWaitTime = maxWaitTimes[GameManager.instance.collectiblesCollected];
 		} else {
@@ -35,33 +46,23 @@ public class LightFlicker : MonoBehaviour
 			maxWaitTime = maxWaitTimes[3];
 		}
 
-		if(audioSource != null) {
-			AudioManager audioManager = GameManager.instance.audioManager;
-			if(!audioSource.isPlaying) {
-				collected = GameManager.instance.collectiblesCollected;
-				if(collected == 0) {
-					AudioClip clip = audioManager.FindClip("Lights1");
-					audioSource.clip = clip;
-					audioSource.Play();	
-				} else if(collected == 1) {
-					AudioClip clip = audioManager.FindClip("Lights2");
-				audioSource.clip = clip;
-				audioSource.Play();	
-				} else if(collected == 2) {
-				AudioClip clip = audioManager.FindClip("Lights3");
-				audioSource.clip = clip;
-				audioSource.Play();	
-				} else if(collected >= 3) {
-					AudioClip clip = audioManager.FindClip("Lights4");
-					audioSource.clip = clip;
-					audioSource.Play();	
-				}
-			}
-			
-
-			if(collected != GameManager.instance.collectiblesCollected) {
-				audioSource.Stop();
+		
+		switch (collected) {
+			case 0:
+				audioM.Play("Lights1", audioSource);
+				break;
+			case 1: 
+				audioM.Play("Lights2", audioSource);
+				break;
+			case 2: 
+				audioM.Play("Lights3", audioSource);
+				break;
+			case 3: 
+				audioM.Play("Lights4", audioSource);
+				break;
 			}	
+		if(collected != gameM.collectiblesCollected) {
+			audioSource.Stop();
 		}
 
 		curMats = renderer.materials;

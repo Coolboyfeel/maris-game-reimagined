@@ -8,7 +8,7 @@ public class AIController : MonoBehaviour
 {
     public float visionDistance;
     private AudioSource audioSource;
-    public AudioSource walkingAudio;
+    public AudioSource walkingSource;
     
     private GameObject player;
     private Kleding kledingScript;
@@ -75,16 +75,14 @@ public class AIController : MonoBehaviour
     private void Update() {
         if(walking) {
 
-            if(!this.walkingAudio.isPlaying) {
-                AudioClip clip = audioM.FindClip("Walking");
-                this.walkingAudio.clip = clip;
-                this.walkingAudio.Play();
+            if(!this.walkingSource.isPlaying) {
+                audioM.Play("Walking", walkingSource);
             }
             
         } else if (gameM.paused) {
-            this.walkingAudio.Stop(); 
+            this.walkingSource.Stop(); 
         } else {
-            this.walkingAudio.Stop();
+            this.walkingSource.Stop();
         }
         
 
@@ -246,9 +244,9 @@ public class AIController : MonoBehaviour
             curName = angrySounds[index];
         }
 
-        AudioClip clip = audioM.FindClip(curName);
+        Sound s = audioM.FindSound(curName);
         SubtitleObject subtitle = audioM.FindSubtitle(curName);
-        this.audioSource.clip = clip;
+        this.audioSource.clip = s.clip;
         this.audioSource.Play();
         if(subtitle != null) {
             subtitles.SetSubtitle(subtitle.subtitle);
