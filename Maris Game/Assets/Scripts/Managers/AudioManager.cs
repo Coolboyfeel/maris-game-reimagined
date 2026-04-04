@@ -10,11 +10,12 @@ public class AudioManager : MonoBehaviour, IDataPersistence
     public Sound[] sounds;
 
     private GameManager gameM;
-    public AudioSource defaultSource;
+    private AudioSource defaultSource;
 
     public float volume = 1f;
 
     private void Awake() {
+        /*
         foreach (Sound s in sounds) {
             s.source = gameObject.AddComponent<AudioSource>();
             s.source.clip = s.clip;
@@ -22,7 +23,9 @@ public class AudioManager : MonoBehaviour, IDataPersistence
             s.source.pitch = s.pitch;
             s.source.loop = s.loop;
             s.source.spatialBlend = s.spatialBlend;
-        } 
+        } */
+
+        defaultSource = gameObject.GetComponent<AudioSource>();
     }
 
     private void Start()
@@ -104,18 +107,18 @@ public class AudioManager : MonoBehaviour, IDataPersistence
             return null; 
         }
         Sound s = Array.Find(sounds, sound => sound.name == name);
-        if(s != null) {
-
-            if(GameManager.instance.language == "English") {
-                return s.subtitleEnglish;
-            } else if(GameManager.instance.language == "Nederlands") {
-                return s.subtitleDutch;
-            } else {
-                return null;
-            }
+        if(s == null) {
+            throw new Exception("Associated Subtitle: " + name + " not found");
         }
-        Debug.LogError("Associated Subtitle: " + name + " not found");
-        return null;
+        
+        switch (GameManager.instance.language) {
+            case "English":
+                return s.subtitleEnglish;
+            case "Nederlands":
+                return s.subtitleDutch;
+            default:
+                return null;
+        }
     }
 
     public void StopAllSounds() {

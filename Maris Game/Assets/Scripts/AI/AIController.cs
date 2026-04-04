@@ -7,8 +7,8 @@ using UnityEngine.Audio;
 public class AIController : MonoBehaviour
 {
     public float visionDistance;
-    private AudioSource audioSource;
-    public AudioSource walkingSource;
+    
+    
     
     private GameObject player;
     private Kleding kledingScript;
@@ -35,6 +35,7 @@ public class AIController : MonoBehaviour
     public string[] jasSounds;
     public string[] angrySounds;
     public Subtitles subtitles;
+    private AudioSource audioSource;
 
     public Sound[] normalSoundss;
     public Sound[] kapjeSoundss;
@@ -75,14 +76,14 @@ public class AIController : MonoBehaviour
     private void Update() {
         if(walking) {
 
-            if(!this.walkingSource.isPlaying) {
-                audioM.Play("Walking", walkingSource);
+            if(!this.audioSource.isPlaying) {
+                audioM.Play("Walking", audioSource);
             }
             
         } else if (gameM.paused) {
-            this.walkingSource.Stop(); 
+            this.audioSource.Stop(); 
         } else {
-            this.walkingSource.Stop();
+            this.audioSource.Stop();
         }
         
 
